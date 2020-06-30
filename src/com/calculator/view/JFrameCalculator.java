@@ -8,22 +8,30 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import com.calculator.controller.BaseController;
+import com.calculator.controller.ExpressionStack;
+
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 public class JFrameCalculator extends JFrame implements ActionListener {
 
-	JPanel jpButton, jpResult; // 패널 초기화
-	JLabel jlbResult1, jlbResult2; // 레이블 초기화
-	JButton[] jbButton = null; // 버튼배열 초기화
-	String[] numStr = {
+	//스택 생성
+	ExpressionStack es = new ExpressionStack(20);
+	
+	protected JPanel jpButton, jpResult; // 패널 초기화
+	protected JLabel jlbResult1, jlbResult2; // 레이블 초기화
+	protected JButton[] jbButton = null; // 버튼배열 초기화
+	protected String[] numStr = {
 			"MR", "MC", "HIS", "C", "←",
 			"x^2", "1/x", "|x|", "exp", "mod",
 			"x^3", "(", ")", "n!", "÷",
 			"x^n", "7", "8", "9", "×",
-			"10^x", "4", "5", "6", "－",
-			"log", "1", "2", "3", "＋",
+			"10^x", "4", "5", "6", "-",
+			"log", "1", "2", "3", "+",
 			"ln", "+/-", "0", ".", "=",
 			}; // 버튼에 들어갈 값
 
@@ -81,26 +89,28 @@ public class JFrameCalculator extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
-	Double[] eqs = {};
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String btnName = e.getActionCommand();
-		
-		if (jlbResult2.getText().equals("0")) {
-			System.out.println(btnName);
-			jlbResult2.setText(btnName);	
-		}else {
-			jlbResult2.setText(jlbResult2.getText() + btnName);
-		}
-		
-	}
-	/** 버튼 이벤트 끝 */
 
-	public static void main(String[] args) {
-		
-		JFrameCalculator v = new JFrameCalculator();
-		
+		try {
+			// 버튼 액션이 동작할 때 마다 stack에 저장
+			es.push(btnName);
+		}catch (ExpressionStack.OverflowStackException o) {
+			System.out.println("스택이 가득 찼습니다.");
+			es.isFull();
+		}
+		if(btnName.equals("←")) {
+			System.out.println("백스페이스");
+			es.isEmpty(); //stack빈 것 확인
+			es.pop(); // peek값 제거
+		}else if(btnName.equals("=")) {
+			System.out.println("=입력");
+			es.dump();
+			
+		}
+		jlbResult2.setText(es.dump());
 	}
+
 
 }
